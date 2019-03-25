@@ -1,11 +1,18 @@
 <template>
-  <div id="app">hello world</div>
+  <div id="app">
+    <span>hello</span>
+  </div>
 </template>
 
 <script>
 export default {
-  name: "app"
-};
+  name: 'app'
+}
 </script>
-<style lang="stylus">
+<style lang="sass" scoped>
+@import '~common/sass/variable'
+
+#app
+  color: $color-theme
+
 </style>
