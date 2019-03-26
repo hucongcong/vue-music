@@ -1,12 +1,16 @@
 <template>
   <div id="app">
-    <span>hello</span>
+    <m-header></m-header>
   </div>
 </template>
 
 <script>
+import MHeader from 'components/m-header'
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    MHeader
+  }
 }
 </script>
 <style lang="sass" scoped>
@@ -14,5 +18,9 @@ export default {
 
 #app
   color: $color-theme
-
+  width: 100%
+  max-width: 640px
+  min-width: 320px
+  margin: 0 auto
+  background-color: $color-background
 </style>
