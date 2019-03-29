@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "better-scroll": "^1.15.1",
     "swiper": "^4.5.0",
     "vue": "^2.6.6",
     "vue-router": "^3.0.2",

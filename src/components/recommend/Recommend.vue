@@ -1,37 +1,41 @@
 <template>
   <div class="recommend">
-    <!-- 轮播图 -->
-    <swiper v-if="swiperList.length">
-      <div v-for="item in swiperList" :key="item.id">
-        <a :href="item.linkUrl">
-          <img :src="item.picUrl" alt>
-        </a>
-      </div>
-    </swiper>
+    <g-scroll>
+      <!-- 轮播图 -->
+      <swiper v-if="swiperList.length">
+        <div v-for="item in swiperList" :key="item.id">
+          <a :href="item.linkUrl">
+            <img :src="item.picUrl" alt>
+          </a>
+        </div>
+      </swiper>
 
-    <!-- 歌单列表 -->
-    <div class="recommend-list">
-      <h1 class="list-title">热门歌单推荐</h1>
-      <ul>
-        <li class="item" v-for="item in playList" :key="item.id">
-          <div class="icon">
-            <img width="60" height="60" :src="item.imgurl" alt>
-          </div>
-          <div class="text">
-            <h2 class="name" v-html="item.creator.name"></h2>
-            <p class="desc" v-html="item.dissname"></p>
-          </div>
-        </li>
-      </ul>
-    </div>
+      <!-- 歌单列表 -->
+      <div class="recommend-list">
+        <h1 class="list-title">热门歌单推荐</h1>
+        <ul>
+          <li class="item" v-for="item in playList" :key="item.id">
+            <div class="icon">
+              <img width="60" height="60" :src="item.imgurl" alt>
+            </div>
+            <div class="text">
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </g-scroll>
   </div>
 </template>
 
 <script>
 import Swiper from 'base/swiper/Swiper'
+import GScroll from 'base/gscroll/GScroll'
 export default {
   components: {
-    Swiper
+    Swiper,
+    GScroll
   },
   created() {
     this._getSwiperData()
