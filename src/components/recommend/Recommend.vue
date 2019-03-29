@@ -13,10 +13,12 @@
       <!-- 歌单列表 -->
       <div class="recommend-list">
         <h1 class="list-title">热门歌单推荐</h1>
+        <!-- loading的使用 -->
+        <g-loading v-show="playList.length === 0"></g-loading>
         <ul>
           <li class="item" v-for="item in playList" :key="item.id">
             <div class="icon">
-              <img width="60" height="60" :src="item.imgurl" alt>
+              <img width="60" height="60" v-lazy="item.imgurl" alt>
             </div>
             <div class="text">
               <h2 class="name" v-html="item.creator.name"></h2>
@@ -32,10 +34,12 @@
 <script>
 import Swiper from 'base/swiper/Swiper'
 import GScroll from 'base/gscroll/GScroll'
+import GLoading from 'base/g-loading/GLoading'
 export default {
   components: {
     Swiper,
-    GScroll
+    GScroll,
+    GLoading
   },
   created() {
     this._getSwiperData()
