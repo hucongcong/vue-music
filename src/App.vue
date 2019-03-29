@@ -20,13 +20,4 @@ export default {
 }
 </script>
 <style lang="sass" scoped>
-@import '~common/sass/variable'
-
-#app
-  width: 100%
-  max-width: 640px
-  min-width: 320px
-  margin: 0 auto
-  height: 1000px
-  background-color: $color-background
 </style>
