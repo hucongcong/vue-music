@@ -11,7 +11,7 @@ import BScroll from 'better-scroll'
 export default {
   props: {
     data: {
-      type: Object
+      type: Array
     }
   },
   mounted() {
@@ -29,8 +29,8 @@ export default {
   },
   watch: {
     data: {
-      handler: () => {
-        this.$scroll.refresh()
+      handler() {
+        this.$scroll && this.$scroll.refresh()
       },
       deep: true
     }

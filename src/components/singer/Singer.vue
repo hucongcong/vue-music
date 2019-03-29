@@ -1,12 +1,18 @@
 <template>
-  <div class="singer">歌手列表</div>
+  <div class="singer">
+    <list-view :data="singerList"></list-view>
+  </div>
 </template>
 
 <script>
 import Singer from 'common/js/singer'
+import ListView from 'base/list-view/ListView'
 const HOT_NAME = '热门'
 const HOT_LENGTH = 10
 export default {
+  components: {
+    ListView
+  },
   data() {
     return {
       singerList: []
@@ -42,7 +48,18 @@ export default {
         // 添加数据
         map[key].items.push(new Singer(item))
       })
-      return map
+      // 对map处理
+      let hot = [map.hot]
+      let others = []
+      for (let k in map) {
+        if (/^[a-zA-Z]$/.test(k)) {
+          others.push(map[k])
+        }
+      }
+      others.sort((a, b) => {
+        return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+      })
+      return [...hot, ...others]
     }
   },
   created() {
@@ -51,5 +68,11 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+.singer {
+  position: fixed;
+  top: 88px;
+  bottom: 0;
+  width: 100%;
+}
 </style>
