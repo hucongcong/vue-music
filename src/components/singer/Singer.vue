@@ -21,7 +21,9 @@ export default {
   methods: {
     async _getSingerList() {
       let { code, data } = await this.$http.get('/singer/list')
-      this.singerList = this._normalize(data.list)
+      if (code === 0) {
+        this.singerList = this._normalize(data.list)
+      }
     },
     // 处理singer数据
     _normalize(singerList) {

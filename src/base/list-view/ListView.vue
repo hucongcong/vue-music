@@ -1,9 +1,9 @@
 <template>
   <div class="listview">
-    <g-scroll :data="data">
+    <g-scroll ref="scroll" :data="data">
       <!-- 歌手列表 -->
       <ul>
-        <li v-for="group in data" :key="group.title" class="list-group">
+        <li ref="listGroups" v-for="group in data" :key="group.title" class="list-group">
           <h2 class="list-group-title">{{group.title}}</h2>
           <ul>
             <li class="list-group-item" v-for="item in group.items" :key="item.id">
@@ -15,9 +15,15 @@
       </ul>
     </g-scroll>
     <!-- 右侧快捷导航 -->
-    <div class="list-shortcut">
+    <div class="list-shortcut" @touchstart="touchStart" @touchmove="touchMove">
       <ul>
-        <li class="item" v-for="item in shortcutList" :key="item">{{item}}</li>
+        <li
+          ref="shortcutItems"
+          class="item"
+          :data-index="index"
+          v-for="(item, index) in shortcutList"
+          :key="item"
+        >{{item}}</li>
       </ul>
     </div>
   </div>
@@ -25,7 +31,12 @@
 
 <script>
 import GScroll from 'base/gscroll/GScroll'
+// 右侧每个导航的高度
+const ANCHOR_HEIGHT = 18
 export default {
+  created() {
+    this.touch = {}
+  },
   components: {
     GScroll
   },
@@ -38,6 +49,33 @@ export default {
   computed: {
     shortcutList() {
       return this.data.map(item => item.title.slice(0, 1))
+    }
+  },
+  methods: {
+    touchStart(e) {
+      let index = e.target.dataset.index
+      // 获取对应的li
+      let current = this.$refs.listGroups[index]
+      this.$refs.scroll.scrollToElement(current, 300)
+
+      // 记录开始值
+      this.touch.y1 = e.touches[0].pageY
+      // console.log(this.touch.y1)
+
+      // 记录开始的下标
+      this.touch.index = +index
+    },
+    touchMove(e) {
+      // 获取到移动的y坐标
+      this.touch.y2 = e.touches[0].pageY
+      // 计算需要移动的li的个数
+      let delta = ((this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT) | 0
+      // 需要滚动到的下标
+      let index = this.touch.index + delta
+      // 获取到需要滚动到的元素
+      let current = this.$refs.listGroups[index]
+      // 滚动到该元素的位置
+      this.$refs.scroll.scrollToElement(current, 300)
     }
   }
 }
@@ -86,7 +124,7 @@ export default {
     top: 50%;
     transform: translateY(-50%);
     width: 20px;
-    padding: 20px 0;
+    padding: 5px 0;
     border-radius: 10px;
     text-align: center;
     background: $color-background-d;

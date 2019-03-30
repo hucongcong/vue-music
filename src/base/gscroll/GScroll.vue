@@ -25,6 +25,13 @@ export default {
     },
     refresh() {
       this.$scroll && this.$scroll.refresh()
+    },
+    scrollTo() {
+      this.$scroll.scrollTo(...arguments)
+    },
+    scrollToElement() {
+      // arguments是一个伪数组，scrollToElement的参数是多个，所以需要平铺该数组
+      this.$scroll.scrollToElement(...arguments)
     }
   },
   watch: {
