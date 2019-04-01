@@ -31,20 +31,33 @@
         >{{item}}</li>
       </ul>
     </div>
+    <!-- 固定标题 -->
+    <div
+      class="list-fixed"
+      :style="{transform: `translate3d(0, ${fixedTop}px, 0)`}"
+      v-show="scrollY <= 0"
+    >
+      <div class="fixed-title">{{fixedTitle}}</div>
+      <g-loading v-show="!datas.length"></g-loading>
+    </div>
   </div>
 </template>
 
 <script>
 import GScroll from 'base/gscroll/GScroll'
+import GLoading from 'base/g-loading/GLoading'
 // 右侧每个导航的高度
 const ANCHOR_HEIGHT = 18
+const FIXED_TOP = 30
 export default {
   data() {
     return {
       // 歌单滚动的距离
       scrollY: -1,
       // 当前显示的下标
-      currentIndex: 0
+      currentIndex: 0,
+      fixedTop: 0,
+      diff: 0
     }
   },
   created() {
@@ -52,7 +65,8 @@ export default {
     this.listHeight = []
   },
   components: {
-    GScroll
+    GScroll,
+    GLoading
   },
   props: {
     datas: {
@@ -62,6 +76,11 @@ export default {
   computed: {
     shortcutList() {
       return this.datas.map(item => item.title.slice(0, 1))
+    },
+    fixedTitle() {
+      // 固定的标题内容
+      let current = this.datas[this.currentIndex]
+      return current ? current.title : ''
     }
   },
   methods: {
@@ -122,12 +141,24 @@ export default {
       for (let i = 0; i < this.listHeight.length; i++) {
         let h1 = this.listHeight[i]
         let h2 = this.listHeight[i + 1]
-        // console.log(i)
+        // if (fixedTop <= FIXED_TOP) {
+        //   this.fixedTop = fixedTop - FIXED_TOP
+        // }
+        // // if (this.fixedTop === fixedTop) return
+        // this.fixedTop = fixedTop
+        // console.log(this.fixedTop)
+        // 处理高亮
         if (Math.abs(newY) >= h1 && Math.abs(newY) < h2) {
           this.currentIndex = i
+          this.diff = h2 + newY
           break
         }
       }
+    },
+    diff(newDiff) {
+      let fixedTop = newDiff <= FIXED_TOP ? newDiff - FIXED_TOP : 0
+      if (this.fixedTop === fixedTop) return
+      this.fixedTop = fixedTop
     }
   }
 }
@@ -190,6 +221,23 @@ export default {
       &.current {
         color: $color-theme;
       }
+    }
+  }
+
+  .list-fixed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+
+    .fixed-title {
+      height: 30px;
+      line-height: 30px;
+      padding-left: 20px;
+      font-size: $font-size-small;
+      color: $color-text-l;
+      background: $color-highlight-background;
     }
   }
 }
