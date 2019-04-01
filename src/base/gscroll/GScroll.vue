@@ -12,6 +12,14 @@ export default {
   props: {
     data: {
       type: Array
+    },
+    probeType: {
+      type: Number,
+      default: 1
+    },
+    listenScroll: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -20,8 +28,17 @@ export default {
   methods: {
     _initScroll() {
       this.$scroll = new BScroll(this.$refs.wrapper, {
-        click: true
+        click: true,
+        probeType: this.probeType
       })
+
+      // 如果监听了scroll事件
+      if (this.listenScroll) {
+        this.$scroll.on('scroll', pos => {
+          // 触发父组件的scroll事件，把pos传递给父组件
+          this.$emit('scroll', pos)
+        })
+      }
     },
     refresh() {
       this.$scroll && this.$scroll.refresh()

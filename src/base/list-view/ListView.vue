@@ -1,9 +1,9 @@
 <template>
   <div class="listview">
-    <g-scroll ref="scroll" :data="data">
+    <g-scroll ref="scroll" :data="datas" :listenScroll="true" @scroll="scroll" :probeType="3">
       <!-- 歌手列表 -->
       <ul>
-        <li ref="listGroups" v-for="group in data" :key="group.title" class="list-group">
+        <li ref="listGroups" v-for="group in datas" :key="group.title" class="list-group">
           <h2 class="list-group-title">{{group.title}}</h2>
           <ul>
             <li class="list-group-item" v-for="item in group.items" :key="item.id">
@@ -15,11 +15,16 @@
       </ul>
     </g-scroll>
     <!-- 右侧快捷导航 -->
-    <div class="list-shortcut" @touchstart="touchStart" @touchmove="touchMove">
+    <div
+      class="list-shortcut"
+      @touchstart.stop.prevent="touchStart"
+      @touchmove.stop.prevent="touchMove"
+    >
       <ul>
         <li
           ref="shortcutItems"
           class="item"
+          :class="{current: currentIndex === index}"
           :data-index="index"
           v-for="(item, index) in shortcutList"
           :key="item"
@@ -34,21 +39,29 @@ import GScroll from 'base/gscroll/GScroll'
 // 右侧每个导航的高度
 const ANCHOR_HEIGHT = 18
 export default {
+  data() {
+    return {
+      // 歌单滚动的距离
+      scrollY: -1,
+      // 当前显示的下标
+      currentIndex: 0
+    }
+  },
   created() {
     this.touch = {}
+    this.listHeight = []
   },
   components: {
     GScroll
   },
   props: {
-    data: {
-      type: Array,
-      default: []
+    datas: {
+      type: Array
     }
   },
   computed: {
     shortcutList() {
-      return this.data.map(item => item.title.slice(0, 1))
+      return this.datas.map(item => item.title.slice(0, 1))
     }
   },
   methods: {
@@ -76,6 +89,45 @@ export default {
       let current = this.$refs.listGroups[index]
       // 滚动到该元素的位置
       this.$refs.scroll.scrollToElement(current, 300)
+    },
+    scroll(pos) {
+      this.scrollY = pos.y
+      // console.log(this.scrollY)
+    },
+    // 计算每个group的高度
+    _caculateHeight() {
+      this.listHeight = [0]
+      const list = this.$refs.listGroups
+      let height = 0
+      for (var i = 0; i < list.length; i++) {
+        let item = list[i]
+        height += item.offsetHeight
+        this.listHeight.push(height)
+      }
+    }
+  },
+  // 监视data的变化
+  watch: {
+    datas: {
+      handler() {
+        // 数据发生更新，需要等待
+        this.$nextTick(() => {
+          this._caculateHeight()
+        })
+      },
+      deep: true
+    },
+    // 监听scrollY的变化
+    scrollY(newY) {
+      for (let i = 0; i < this.listHeight.length; i++) {
+        let h1 = this.listHeight[i]
+        let h2 = this.listHeight[i + 1]
+        // console.log(i)
+        if (Math.abs(newY) >= h1 && Math.abs(newY) < h2) {
+          this.currentIndex = i
+          break
+        }
+      }
     }
   }
 }
