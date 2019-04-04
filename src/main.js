@@ -10,6 +10,9 @@ import http from './api/http'
 // 导入vue-lazyload
 import VueLazyload from 'vue-lazyload'
 
+// 导入vuex
+import store from './store'
+
 Vue.use(VueLazyload, {
   loading: require('common/images/default.png')
 })
@@ -19,5 +22,6 @@ Vue.config.productionTip = false
 
 new Vue({
   render: h => h(App),
-  router
+  router,
+  store
 }).$mount('#app')

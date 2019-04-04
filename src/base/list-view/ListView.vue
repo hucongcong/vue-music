@@ -6,7 +6,12 @@
         <li ref="listGroups" v-for="group in datas" :key="group.title" class="list-group">
           <h2 class="list-group-title">{{group.title}}</h2>
           <ul>
-            <li class="list-group-item" v-for="item in group.items" :key="item.id">
+            <li
+              @click="selectItem(item)"
+              class="list-group-item"
+              v-for="item in group.items"
+              :key="item.id"
+            >
               <img class="avatar" v-lazy="item.avatar" alt>
               <span class="name">{{item.name}}</span>
             </li>
@@ -123,6 +128,9 @@ export default {
         height += item.offsetHeight
         this.listHeight.push(height)
       }
+    },
+    selectItem(item) {
+      this.$emit('select', item)
     }
   },
   // 监视data的变化
@@ -165,7 +173,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '~common/sass/variable';
+@import "~common/sass/variable";
 
 .listview {
   position: relative;

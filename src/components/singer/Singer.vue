@@ -1,12 +1,15 @@
 <template>
   <div class="singer">
-    <list-view :datas="singerList"></list-view>
+    <list-view @select="select" :datas="singerList"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 import Singer from 'common/js/singer'
 import ListView from 'base/list-view/ListView'
+import * as types from '@/store/mutation-type'
+import { mapMutations } from 'vuex'
 const HOT_NAME = '热门'
 const HOT_LENGTH = 10
 export default {
@@ -19,6 +22,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setSinger: types.SET_SINGER
+    }),
     async _getSingerList() {
       let { code, data } = await this.$http.get('/singer/list')
       if (code === 0) {
@@ -62,6 +68,11 @@ export default {
         return a.title.charCodeAt(0) - b.title.charCodeAt(0)
       })
       return [...hot, ...others]
+    },
+    select(item) {
+      this.$router.push(`/singer/${item.id}`)
+      // 给vuex中设置singer
+      this.setSinger(item)
     }
   },
   created() {
