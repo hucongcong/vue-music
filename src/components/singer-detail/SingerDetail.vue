@@ -1,19 +1,32 @@
 <template>
   <transition name="slide">
-    <div class="singer-detail">哈哈哈哈</div>
+    <div class="singer-detail">
+      <music-list :songs="songList" :bgImage="bgImage" :title="title"></music-list>
+    </div>
   </transition>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import Song from 'common/js/song'
+import MusicList from 'components/music-list/MusicList'
 export default {
+  components: {
+    MusicList
+  },
   data() {
     return {
-      detail: {}
+      songList: []
     }
   },
   computed: {
-    ...mapGetters(['singer'])
+    ...mapGetters(['singer']),
+    title() {
+      return this.singer.name
+    },
+    bgImage() {
+      return this.singer.avatar
+    }
   },
   created() {
     this._getSingerDetail()
@@ -23,21 +36,26 @@ export default {
       let id = this.singer.id
       if (!id) {
         // 如果vuex中没有id值，那么从路由参数中获取即可
-        id = this.$route.params.id
+        this.$router.push('/singer')
       }
-      console.log(id)
       // 发送ajax请求，获取歌手详情数据
       let { code, data } = await this.$http.get(`/singer/detail?id=${id}`)
       if (code === 0) {
-        this.detail = data
+        this.songList = this._normalizeSongList(data.list)
+        console.log(this.songList)
       }
+    },
+    _normalizeSongList(list) {
+      return list.map(item => {
+        return new Song(item.musicData)
+      })
     }
   }
 }
 </script>
 
 <style lang="scss">
-@import "~common/sass/variable";
+@import '~common/sass/variable';
 .singer-detail {
   position: fixed;
   z-index: 1000;
