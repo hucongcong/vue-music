@@ -28,6 +28,7 @@ export default {
     async _getSingerList() {
       let { code, data } = await this.$http.get('/singer/list')
       if (code === 0) {
+        console.log(data.list)
         this.singerList = this._normalize(data.list)
       }
     },
@@ -72,6 +73,7 @@ export default {
     select(item) {
       this.$router.push(`/singer/${item.id}`)
       // 给vuex中设置singer
+      console.log(item)
       this.setSinger(item)
     }
   },
