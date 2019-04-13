@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapper" class="g-scroll scroll-wrapper">
+  <div ref="wrapper" class="g-scroll scroll-wrapper" :style="{overflow: overflow? 'hidden': ''}">
     <div class="scroll">
       <slot></slot>
     </div>
@@ -20,6 +20,10 @@ export default {
     listenScroll: {
       type: Boolean,
       default: false
+    },
+    overflow: {
+      type: Boolean,
+      default: true
     }
   },
   mounted() {
@@ -70,7 +74,6 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
 
   .scroll {
     position: absolute;

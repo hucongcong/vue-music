@@ -1,7 +1,7 @@
 <template>
   <transition name="slide">
     <div class="singer-detail">
-      <music-list :songs="songList" :bgImage="bgImage" :title="title"></music-list>
+      <music-list :songs="songs" :bgImage="bgImage" :title="title"></music-list>
     </div>
   </transition>
 </template>
@@ -16,7 +16,7 @@ export default {
   },
   data() {
     return {
-      songList: []
+      songs: []
     }
   },
   computed: {
@@ -41,8 +41,7 @@ export default {
       // 发送ajax请求，获取歌手详情数据
       let { code, data } = await this.$http.get(`/singer/detail?id=${id}`)
       if (code === 0) {
-        this.songList = this._normalizeSongList(data.list)
-        console.log(this.songList)
+        this.songs = this._normalizeSongList(data.list)
       }
     },
     _normalizeSongList(list) {

@@ -7,3 +7,9 @@
     background-image: url($url+'@3x.png');
   }
 }
+
+@mixin no-wrap() {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
