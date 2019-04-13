@@ -28,7 +28,6 @@ export default {
     async _getSingerList() {
       let { code, data } = await this.$http.get('/singer/list')
       if (code === 0) {
-        console.log(data.list)
         this.singerList = this._normalize(data.list)
       }
     },

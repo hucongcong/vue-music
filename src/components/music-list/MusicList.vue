@@ -40,8 +40,7 @@ export default {
       default: ''
     },
     songs: {
-      type: Array,
-      default: []
+      type: Array
     },
     title: {
       type: String,
