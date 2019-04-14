@@ -23,7 +23,7 @@
       @scroll="scroll"
       ref="scroll"
     >
-      <song-list :songs="songs"></song-list>
+      <song-list @select="select" :songs="songs"></song-list>
       <g-loading v-if="songs.length === 0"></g-loading>
     </g-scroll>
   </div>
@@ -33,6 +33,7 @@
 import GScroll from 'base/gscroll/GScroll'
 import SongList from 'base/song-list/SongList'
 import GLoading from 'base/g-loading/GLoading'
+import { mapActions } from 'vuex'
 export default {
   props: {
     bgImage: {
@@ -56,6 +57,7 @@ export default {
     GLoading
   },
   methods: {
+    ...mapActions(['selectPlay']),
     back() {
       this.$router.back()
     },
@@ -95,6 +97,13 @@ export default {
         this.$refs.bgImg.style.paddingTop = '70%'
         this.$refs.playBtn.style.display = ''
       }
+    },
+    select(song, index) {
+      // 派发action，播放音乐
+      this.selectPlay({
+        list: this.songs,
+        index
+      })
     }
   }
 }

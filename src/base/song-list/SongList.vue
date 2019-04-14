@@ -1,7 +1,12 @@
 <template>
   <div class="song-list">
     <ul>
-      <li class="item" v-for="song in songs" :key="song.id">
+      <li
+        @click="selectSong(song, index)"
+        class="item"
+        v-for="(song, index) in songs"
+        :key="song.id"
+      >
         <div class="content">
           <h2 class="name">{{song.name}}</h2>
           <p class="desc">{{song.singer}}。{{song.album}}</p>
@@ -15,8 +20,13 @@
 export default {
   props: {
     songs: {
-      type: Array,
-      default: []
+      type: Array
+    }
+  },
+  methods: {
+    selectSong(song, index) {
+      // 给父组件传值
+      this.$emit('select', song, index)
     }
   }
 }
