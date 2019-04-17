@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "better-scroll": "^1.15.1",
+    "create-keyframe-animation": "^0.1.0",
     "swiper": "^4.5.0",
     "vue": "^2.6.6",
     "vue-lazyload": "^1.2.6",

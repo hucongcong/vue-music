@@ -1,68 +1,83 @@
 <template>
   <div class="player" v-show="playList.length">
     <!-- 全屏的播放器 -->
-    <div class="normal-player" v-show="fullScreen">
-      <div class="background">
-        <img width="100%" height="100%" :src="currentSong.image" alt>
-      </div>
-      <div class="top">
-        <div class="back" @click="back">
-          <i class="icon-back"></i>
+    <transition
+      name="normal"
+      @enter="enter"
+      @after-enter="afterEnter"
+      @leave="leave"
+      @after-leave="afterLeave"
+    >
+      <div class="normal-player" v-show="fullScreen">
+        <div class="background">
+          <img width="100%" height="100%" :src="currentSong.image" alt>
         </div>
-        <h1 class="title" v-html="currentSong.name"></h1>
-        <h2 class="subtitle" v-html="currentSong.singer"></h2>
-      </div>
-      <div class="middel">
-        <div class="middel-l">
-          <div class="cd-wrapper">
-            <div class="cd">
-              <img class="image" :src="currentSong.image" alt>
+        <div class="top">
+          <div class="back" @click="back">
+            <i class="icon-back"></i>
+          </div>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singer"></h2>
+        </div>
+        <div class="middel">
+          <div class="middel-l">
+            <div class="cd-wrapper" ref="cdWrapper">
+              <div class="cd">
+                <img class="image" :src="currentSong.image" alt>
+              </div>
+            </div>
+          </div>
+          <div class="middel-r"></div>
+        </div>
+        <div class="bottom">
+          <div class="operators">
+            <div class="icon i-left">
+              <i class="icon-sequence"></i>
+            </div>
+            <div class="icon i-left">
+              <i class="icon-prev"></i>
+            </div>
+            <div class="icon i-center">
+              <i class="icon-play"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon-next"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon-not-favorite"></i>
             </div>
           </div>
         </div>
-        <div class="middel-r"></div>
       </div>
-      <div class="bottom">
-        <div class="operators">
-          <div class="icon i-left">
-            <i class="icon-sequence"></i>
-          </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
-          </div>
-          <div class="icon i-center">
-            <i class="icon-play"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-next"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
-          </div>
+    </transition>
+
+    <!-- mini的播放器 -->
+    <transition name="mini">
+      <div class="mini-player" @click="open" v-show="!fullScreen">
+        <div class="icon">
+          <img width="40" height="40" :src="currentSong.image">
+        </div>
+        <div class="text">
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singer"></p>
+        </div>
+        <div class="control">
+          <i class="icon-playlist"></i>
         </div>
       </div>
-    </div>
-    <!-- mini的播放器 -->
-    <div class="mini-player" @click="open" v-show="!fullScreen">
-      <div class="icon">
-        <img width="40" height="40" :src="currentSong.image">
-      </div>
-      <div class="text">
-        <h2 class="name" v-html="currentSong.name"></h2>
-        <p class="desc" v-html="currentSong.singer"></p>
-      </div>
-      <div class="control">
-        <i class="icon-playlist"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
+import animations from 'create-keyframe-animation'
 export default {
   computed: {
     ...mapGetters(['playList', 'fullScreen', 'currentSong'])
+  },
+  created() {
+    this._getCurrentSongDetail()
   },
   methods: {
     ...mapMutations({
@@ -73,6 +88,79 @@ export default {
     },
     open() {
       this.setFullScreen(true)
+    },
+    enter(el, done) {
+      const { x, y, scale } = this._getPosAndScale()
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0, 0, 0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0, 0, 0) scale(1)`
+        }
+      }
+
+      animations.registerAnimation({
+        name: 'move',
+        animation,
+        presets: {
+          duration: 400,
+          easing: 'linear'
+        }
+      })
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+    },
+    afterEnter() {
+      // 移除动画
+      animations.unregisterAnimation('move')
+      // 清空animation
+      this.$refs.cdWrapper.style.animation = ''
+    },
+    leave(el, done) {
+      let cdWrapper = this.$refs.cdWrapper
+      cdWrapper.style.transition = 'all 0.4s'
+      // 获取最终目标运行的位置
+      const { x, y, scale } = this._getPosAndScale()
+      cdWrapper.style.transform = `transform: translate3d(${x}px, ${y}px, 0) scale(${scale})`
+      cdWrapper.addEventListener('transitionend', done)
+    },
+    afterLeave() {
+      let cdWrapper = this.$refs.cdWrapper
+      cdWrapper.style.transform = `transform: translate3d(0, 0, 0) scale(1)`
+      cdWrapper.style.transition = ''
+    },
+    // 获取位置和缩放尺寸
+    _getPosAndScale() {
+      // mini播放器中图片的位置
+      const targetWidth = 40
+      const paddingLeft = 40
+      const paddingBottom = 30
+
+      // normal播放器中图片的位置
+      const paddingTop = 80
+      const width = window.innerWidth * 0.8
+      // 初始的缩放比例
+      const scale = targetWidth / width
+      const x = -(window.innerWidth / 2 - paddingLeft)
+      const y = window.innerHeight - paddingTop - paddingBottom - width / 2
+      return {
+        x,
+        y,
+        scale
+      }
+    },
+    async _getCurrentSongDetail() {
+      let { mid, id } = this.currentSong
+      let res = await this.$http.get('/singer/url', {
+        params: {
+          mid,
+          id
+        }
+      })
+      console.log(res)
     }
   }
 }
@@ -214,6 +302,24 @@ export default {
         }
       }
     }
+    &.normal-enter-active,
+    &.normal-leave-active {
+      transition: all 0.4s;
+      .top,
+      .bottom {
+        transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32);
+      }
+    }
+    &.normal-enter,
+    &.normal-leave-to {
+      opacity: 0;
+      .top {
+        transform: translate3d(0, -100px, 0);
+      }
+      .bottom {
+        transform: translate3d(0, 100px, 0);
+      }
+    }
   }
   .mini-player {
     display: flex;
@@ -274,6 +380,14 @@ export default {
         left: 0;
         top: 0;
       }
+    }
+    &.mini-enter-active,
+    &.mini-leave-active {
+      transition: all 0.4s;
+    }
+    &.mini-enter,
+    &.mini-leave-to {
+      opacity: 0;
     }
   }
 }
