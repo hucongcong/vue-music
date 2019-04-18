@@ -17,7 +17,7 @@ class Song {
     this.duration = interval
     this.image = `https://y.gtimg.cn/music/photo_new/T002R300x300M000${albummid}.jpg?max_age=2592000`
     // TODO
-    this.url = `http://ws.stream.qqmusic.qq.com/${songid}.m4a?fromtag=46`
+    this.url = `https://api.bzqll.com/music/tencent/url?key=579621905&id=${songmid}br=320`
   }
 }
 

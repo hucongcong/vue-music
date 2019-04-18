@@ -48,6 +48,23 @@ export default {
       return list.map(item => {
         return new Song(item.musicData)
       })
+    },
+    _setSongUrl() {
+      this.songs.forEach(async item => {
+        let { mid, id } = item
+        let res = await this.$http.get('/singer/url', {
+          params: {
+            mid,
+            id
+          }
+        })
+        let { code, req_0 } = res
+        if (code === 0) {
+          item.url = `http://dl.stream.qqmusic.qq.com/${
+            req_0.data.midurlinfo[0].purl
+          }`
+        }
+      })
     }
   }
 }

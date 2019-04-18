@@ -22,7 +22,7 @@
         <div class="middel">
           <div class="middel-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image" alt>
               </div>
             </div>
@@ -35,13 +35,13 @@
               <i class="icon-sequence"></i>
             </div>
             <div class="icon i-left">
-              <i class="icon-prev"></i>
+              <i @click="prev" class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i @click="togglePlay" :class="iconPlay"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-next"></i>
+              <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-not-favorite"></i>
@@ -55,17 +55,21 @@
     <transition name="mini">
       <div class="mini-player" @click="open" v-show="!fullScreen">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image">
+          <img :class="cdCls" width="40" height="40" :src="currentSong.image">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
+          <i class="icon-mini" @click.stop="togglePlay" :class="iconPlayMini"></i>
+        </div>
+        <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio ref="audio" @canplay="ready" @error="error" :src="currentSong.url"></audio>
   </div>
 </template>
 
@@ -73,15 +77,34 @@
 import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 export default {
-  computed: {
-    ...mapGetters(['playList', 'fullScreen', 'currentSong'])
+  data() {
+    return {
+      songReady: false
+    }
   },
-  created() {
-    this._getCurrentSongDetail()
+  computed: {
+    ...mapGetters([
+      'playList',
+      'fullScreen',
+      'currentSong',
+      'playingState',
+      'currentIndex'
+    ]),
+    iconPlay() {
+      return this.playingState ? 'icon-pause' : 'icon-play'
+    },
+    iconPlayMini() {
+      return this.playingState ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    cdCls() {
+      return this.playingState ? 'play' : 'play pause'
+    }
   },
   methods: {
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlayingState: 'SET_PLAYING_STATE',
+      setCurrentIndex: 'SET_CURRENT_INDEX'
     }),
     back() {
       this.setFullScreen(false)
@@ -107,7 +130,7 @@ export default {
         name: 'move',
         animation,
         presets: {
-          duration: 400,
+          duration: 600,
           easing: 'linear'
         }
       })
@@ -121,15 +144,15 @@ export default {
     },
     leave(el, done) {
       let cdWrapper = this.$refs.cdWrapper
-      cdWrapper.style.transition = 'all 0.4s'
+      cdWrapper.style.transition = 'all 0.6s'
       // 获取最终目标运行的位置
       const { x, y, scale } = this._getPosAndScale()
-      cdWrapper.style.transform = `transform: translate3d(${x}px, ${y}px, 0) scale(${scale})`
+      cdWrapper.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
       cdWrapper.addEventListener('transitionend', done)
     },
     afterLeave() {
       let cdWrapper = this.$refs.cdWrapper
-      cdWrapper.style.transform = `transform: translate3d(0, 0, 0) scale(1)`
+      cdWrapper.style.transform = ``
       cdWrapper.style.transition = ''
     },
     // 获取位置和缩放尺寸
@@ -152,15 +175,47 @@ export default {
         scale
       }
     },
-    async _getCurrentSongDetail() {
-      let { mid, id } = this.currentSong
-      let res = await this.$http.get('/singer/url', {
-        params: {
-          mid,
-          id
-        }
+    togglePlay() {
+      if (!this.songReady) return
+      this.setPlayingState(!this.playingState)
+      this.songReady = false
+    },
+    next() {
+      if (!this.songReady) return
+      let index = this.currentIndex + 1
+      if (index >= this.playList.length) {
+        index = 0
+      }
+      this.setCurrentIndex(index)
+      this.songReady = false
+    },
+    prev() {
+      if (!this.songReady) return
+      let index = this.currentIndex - 1
+      if (index <= 0) {
+        index = this.playList.length - 1
+      }
+      this.setCurrentIndex(index)
+      this.songReady = false
+    },
+    ready() {
+      this.songReady = true
+    },
+    error() {
+      this.songReady = true
+    }
+  },
+  watch: {
+    currentSong() {
+      this.$nextTick(() => {
+        this.$refs.audio.play()
       })
-      console.log(res)
+    },
+    playingState(newState) {
+      this.$nextTick(() => {
+        let audio = this.$refs.audio
+        newState ? audio.play() : audio.pause()
+      })
     }
   }
 }
@@ -365,6 +420,7 @@ export default {
       }
     }
     .control {
+      position: relative;
       flex: 0 0 30px;
       width: 30px;
       padding: 0 10px;
@@ -376,9 +432,6 @@ export default {
       }
       .icon-mini {
         font-size: 32px;
-        position: absolute;
-        left: 0;
-        top: 0;
       }
     }
     &.mini-enter-active,
