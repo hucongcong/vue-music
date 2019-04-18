@@ -30,6 +30,13 @@
           <div class="middel-r"></div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{currentTime | timeFilter}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent" @percentChange="percentChange"></progress-bar>
+            </div>
+            <span class="time time-r">{{currentSong.duration | timeFilter}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -69,18 +76,29 @@
         </div>
       </div>
     </transition>
-    <audio ref="audio" @canplay="ready" @error="error" :src="currentSong.url"></audio>
+    <audio
+      ref="audio"
+      @timeupdate="timeUpdate"
+      @canplay="ready"
+      @error="error"
+      :src="currentSong.url"
+    ></audio>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
+import ProgressBar from 'base/progress-bar/ProgressBar'
 export default {
   data() {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0
     }
+  },
+  components: {
+    ProgressBar
   },
   computed: {
     ...mapGetters([
@@ -98,6 +116,9 @@ export default {
     },
     cdCls() {
       return this.playingState ? 'play' : 'play pause'
+    },
+    percent() {
+      return this.currentTime / this.currentSong.duration
     }
   },
   methods: {
@@ -178,7 +199,6 @@ export default {
     togglePlay() {
       if (!this.songReady) return
       this.setPlayingState(!this.playingState)
-      this.songReady = false
     },
     next() {
       if (!this.songReady) return
@@ -203,6 +223,15 @@ export default {
     },
     error() {
       this.songReady = true
+    },
+    timeUpdate(e) {
+      this.currentTime = e.target.currentTime
+    },
+    percentChange(percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      if (!this.playingState) {
+        this.togglePlay()
+      }
     }
   },
   watch: {
@@ -216,6 +245,17 @@ export default {
         let audio = this.$refs.audio
         newState ? audio.play() : audio.pause()
       })
+    }
+  },
+  filters: {
+    // 定义过滤器
+    timeFilter(input) {
+      input = input | 0
+      let minutes = (input / 60) | 0
+      let seconds = input % 60
+      // 给seconds补0
+      seconds = seconds < 10 ? '0' + seconds : seconds
+      return minutes + ':' + seconds
     }
   }
 }
@@ -326,6 +366,29 @@ export default {
       position: absolute;
       bottom: 50px;
       width: 100%;
+      .progress-wrapper {
+        display: flex;
+        align-items: center;
+        width: 80%;
+        margin: 0px auto;
+        padding: 10px 0;
+        .time {
+          color: $color-text;
+          font-size: $font-size-small;
+          flex: 0 0 30px;
+          line-height: 30px;
+          width: 30px;
+          &.time-l {
+            text-align: left;
+          }
+          &.time-r {
+            text-align: right;
+          }
+        }
+        .progress-bar-wrapper {
+          flex: 1;
+        }
+      }
       .operators {
         display: flex;
         align-items: center;

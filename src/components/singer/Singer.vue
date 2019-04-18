@@ -72,7 +72,6 @@ export default {
     select(item) {
       this.$router.push(`/singer/${item.id}`)
       // 给vuex中设置singer
-      console.log(item)
       this.setSinger(item)
     }
   },
